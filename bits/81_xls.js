@@ -394,7 +394,13 @@ function parse_workbook(blob, options) {
 				case 'ColInfo': break; // TODO
 				case 'Row': break; // TODO
 				case 'DBCell': break; // TODO
-				case 'MulBlank': break; // TODO
+				case 'MulBlank': {
+					for(var j = val.c; j <= val.C; ++j) {
+						temp_val= {ixfe:val.ixfes[j - val.c], XF:XFs[val.ixfes[j - val.c]], t:'n'};
+						if(temp_val.XF) safe_format_xf(temp_val, options, wb.opts.Date1904);
+						addcell({c:j, r:val.r}, temp_val, options);
+					}
+				} break;
 				case 'EntExU2': break; // TODO
 				case 'SxView': break; // TODO
 				case 'Sxvd': break; // TODO
@@ -409,7 +415,11 @@ function parse_workbook(blob, options) {
 				case 'Feat': break;
 				case 'FeatHdr': case 'FeatHdr11': break;
 				case 'Feature11': case 'Feature12': case 'List12': break;
-				case 'Blank': break;
+				case 'Blank': {
+					temp_val=make_cell('', val.ixfe, 's');
+					temp_val.XF = XFs[temp_val.ixfe];
+					addcell({c:val.c, r:val.r}, temp_val, options);
+				} break;
 				case 'Country': country = val; break;
 				case 'RecalcId': break;
 				case 'DefaultRowHeight': case 'DxGCol': break; // TODO: htmlify

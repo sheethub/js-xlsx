@@ -313,12 +313,28 @@ function parse_MulRk(blob, length) {
 	return {r:rw, c:col, C:lastcol, rkrec:rkrecs};
 }
 
+/* 2.4.174 */
+function parse_MulBlank(blob, length) {
+	var target = blob.l + length - 2;
+	var rw = blob.read_shift(2), col = blob.read_shift(2);
+	var ixfes = [];
+	while(blob.l < target) ixfes.push(blob.read_shift(2));
+	if(blob.l !== target) throw "MulBlank read error";
+	var lastcol = blob.read_shift(2);
+	if(ixfes.length != lastcol - col + 1) throw "MulBlank length mismatch";
+	return {r:rw, c:col, C:lastcol, ixfes:ixfes};
+}
+
 /* 2.5.20 2.5.249 TODO */
 function parse_CellStyleXF(blob, length, style) {
 	var o = {};
 	var a = blob.read_shift(4), b = blob.read_shift(4);
 	var c = blob.read_shift(4), d = blob.read_shift(2);
 	o.patternType = XLSFillPattern[c >> 26];
+	o.icvTop = c & 0x7F;
+	o.icvBottom = (c >> 7) & 0x7F;
+	o.icvLeft = (b >> 15) & 0x7F;
+	o.icvRight = (b >> 23) & 0x7F;
 	o.icvFore = d & 0x7F;
 	o.icvBack = (d >> 7) & 0x7F;
 	return o;
@@ -670,7 +686,6 @@ var parse_SXLI = parsenoop;
 var parse_SXPI = parsenoop;
 var parse_DocRoute = parsenoop;
 var parse_RecipName = parsenoop;
-var parse_MulBlank = parsenoop;
 var parse_SXDI = parsenoop;
 var parse_SXDB = parsenoop;
 var parse_SXFDB = parsenoop;
